@@ -1,0 +1,86 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python -m src.data.preprocess_spark --input data/raw/titanic_train.csv 
+      --outdir data/processed --params params.yaml
+    deps:
+    - path: data/raw/titanic_train.csv
+      hash: md5
+      md5: 2309cc5f04782ed9bb6016d9f4e381cf
+      size: 61194
+    - path: params.yaml
+      hash: md5
+      md5: e5d68ff2e667c42a00d167a5ce1a3a52
+      size: 446
+    - path: src/data/preprocess_spark.py
+      hash: md5
+      md5: 589523f0290972e0fb3ba76d9209946e
+      size: 5169
+    outs:
+    - path: artifacts/baseline_stats.json
+      hash: md5
+      md5: 3d5655661c8e1da1b9f60cc3d0ad0b14
+      size: 405
+    - path: data/processed/test.parquet
+      hash: md5
+      md5: d62245af76a1600f5adbffbf29ce51f0.dir
+      size: 4964
+      nfiles: 4
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 103305a3b61347d9bef29d5d8a79fde5.dir
+      size: 13479
+      nfiles: 4
+  train:
+    cmd: python -m src.models.train_spark --train data/processed/train.parquet 
+      --test data/processed/test.parquet --params params.yaml
+    deps:
+    - path: data/processed/test.parquet
+      hash: md5
+      md5: d62245af76a1600f5adbffbf29ce51f0.dir
+      size: 4964
+      nfiles: 4
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 103305a3b61347d9bef29d5d8a79fde5.dir
+      size: 13479
+      nfiles: 4
+    - path: params.yaml
+      hash: md5
+      md5: e5d68ff2e667c42a00d167a5ce1a3a52
+      size: 446
+    - path: src/models/train_spark.py
+      hash: md5
+      md5: d2598eb5875c1a6533a4e53815e01574
+      size: 4768
+    outs:
+    - path: artifacts/metrics.json
+      hash: md5
+      md5: d6d55d512aad6cd42fef12de163ea661
+      size: 106
+  drift:
+    cmd: python -m src.monitoring.drift --baseline artifacts/baseline_stats.json
+      --new data/raw/new_data.csv --out artifacts/drift_metrics.json --params 
+      params.yaml
+    deps:
+    - path: artifacts/baseline_stats.json
+      hash: md5
+      md5: 3d5655661c8e1da1b9f60cc3d0ad0b14
+      size: 405
+    - path: data/raw/new_data.csv
+      hash: md5
+      md5: 7533b82eae4b582610cbd68aa636b017
+      size: 28629
+    - path: params.yaml
+      hash: md5
+      md5: e5d68ff2e667c42a00d167a5ce1a3a52
+      size: 446
+    - path: src/monitoring/drift.py
+      hash: md5
+      md5: 05f7037ae03a32abdd17932d5ecc4c12
+      size: 1722
+    outs:
+    - path: artifacts/drift_metrics.json
+      hash: md5
+      md5: a30b08951104e5e1b3c61fa0fdfbb524
+      size: 106

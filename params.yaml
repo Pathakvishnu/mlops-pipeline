@@ -1,0 +1,23 @@
+seed: 42
+split:
+  train: 0.8
+  test: 0.2
+model:
+  name: logistic_regression   # options: logistic_regression, random_forest
+  max_iter: 50
+  reg_param: 0.0
+  elastic_net_param: 0.0
+  rf_num_trees: 200
+  rf_max_depth: 8
+tuning:
+  use_cv: true
+  num_folds: 3
+  grid:
+    lr_reg_params: [0.0, 0.01, 0.1]
+    lr_elastic: [0.0, 0.5]
+    rf_num_trees: [100, 200]
+    rf_max_depth: [6, 8]
+drift:
+  psi_threshold: 0.2
+registry:
+  model_name: titanic_clf

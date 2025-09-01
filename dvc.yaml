@@ -1,0 +1,31 @@
+stages:
+      preprocess:
+        cmd: python -m src.data.preprocess_spark --input data/raw/titanic_train.csv --outdir data/processed --params params.yaml
+        deps:
+          - src/data/preprocess_spark.py
+          - data/raw/titanic_train.csv
+          - params.yaml
+        outs:
+          - data/processed/train.parquet
+          - data/processed/test.parquet
+          - artifacts/baseline_stats.json
+
+      train:
+        cmd: python -m src.models.train_spark --train data/processed/train.parquet --test data/processed/test.parquet --params params.yaml
+        deps:
+          - src/models/train_spark.py
+          - data/processed/train.parquet
+          - data/processed/test.parquet
+          - params.yaml
+        metrics:
+          - artifacts/metrics.json
+
+      drift:
+        cmd: python -m src.monitoring.drift --baseline artifacts/baseline_stats.json --new data/raw/new_data.csv --out artifacts/drift_metrics.json --params params.yaml
+        deps:
+          - src/monitoring/drift.py
+          - artifacts/baseline_stats.json
+          - data/raw/new_data.csv
+          - params.yaml
+        metrics:
+          - artifacts/drift_metrics.json
